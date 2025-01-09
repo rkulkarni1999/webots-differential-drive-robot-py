@@ -1,11 +1,8 @@
-"""differential-drive-robot-controller controller."""
-
-# You may need to import some classes of the controller module. Ex:
-#  from controller import Robot, Motor, DistanceSensor
 from a_star import get_route
 from controller import Robot as WebotsRobot, GPS, Keyboard, InertialUnit
 from enums import *
 from math import pi
+
 
 if __name__ == "__main__":
 
@@ -42,13 +39,29 @@ if __name__ == "__main__":
     orientation = Orientation.NORTH
     A_COMPENSATION = 0.5
 
+
+    # Define points to visit
+    points_to_visit = [(0, 0), (0, 15), (10, 13), (19,19)]
+
+    print(f"POINTS TO VISIT ARE: {points_to_visit}")
+
+    # Calculate Routes
+    def calculate_routes(points):
+        routes = []
+        for ii in range(len(points)-1):
+            route = get_route(points[ii], points[ii+1])
+            routes.extend(route)
+        return routes
+    
+    route = calculate_routes(points_to_visit)
+        
     TILE_SIZE = 0.25
 
     current_state = State.IDLE
     prev_state = None
     initial = False
 
-    route = get_route((0, 0), (19, 19))
+    # route = get_route((0, 0), (19, 19))
     current_x, current_y = route.pop(0)
     state_queue = []
 
@@ -150,8 +163,16 @@ if __name__ == "__main__":
             right_speed = 0
             ongoing_motion -= 1
             
+            # if len(state_queue) <= 0:
+            #     break
+            
             if len(state_queue) <= 0:
-                break
+                if len(route) > 0: 
+                    for _ in range(len(route)):
+                        append_state()
+                else:
+                    break
+            
             key, arg = state_queue.pop(0)
 
         elif current_state == State.TURN:
